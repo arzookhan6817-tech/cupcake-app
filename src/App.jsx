@@ -8,38 +8,46 @@ export default function App() {
     goals: 0,
   });
 
+  const [history, setHistory] = useState({});
+
   const MAX_GOALS = 5;
 
-  // LOAD DATA
+  // LOAD ALL DATA
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(todayKey);
+      const savedHistory = localStorage.getItem("history");
 
-      if (saved) {
-        setDayData(JSON.parse(saved));
-      } else {
-        const freshData = { notes: "", goals: 0 };
-        localStorage.setItem(todayKey, JSON.stringify(freshData));
-        setDayData(freshData);
+      if (savedHistory) {
+        const parsed = JSON.parse(savedHistory);
+        setHistory(parsed);
+
+        if (parsed[todayKey]) {
+          setDayData(parsed[todayKey]);
+        }
       }
     } catch (e) {
       console.log("Load error", e);
     }
   }, []);
 
-  // SAVE DATA
+  // SAVE ALL DATA
   useEffect(() => {
     try {
-      localStorage.setItem(todayKey, JSON.stringify(dayData));
+      const updatedHistory = {
+        ...history,
+        [todayKey]: dayData,
+      };
+
+      setHistory(updatedHistory);
+      localStorage.setItem("history", JSON.stringify(updatedHistory));
     } catch (e) {
       console.log("Save error", e);
     }
   }, [dayData]);
 
-  // COMPLETE GOAL (WITH LIMIT)
   const completeGoal = () => {
     if (dayData.goals >= MAX_GOALS) {
-      alert("You’ve already completed all goals today 😌");
+      alert("You’ve already completed all goals 😌");
       return;
     }
 
@@ -55,7 +63,6 @@ export default function App() {
     }
   };
 
-  // RESET GOALS (optional but powerful)
   const resetGoals = () => {
     setDayData({
       ...dayData,
@@ -63,7 +70,6 @@ export default function App() {
     });
   };
 
-  // GREETING
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning ☀️";
@@ -110,7 +116,7 @@ export default function App() {
           background: "#ff4d6d",
           color: "white",
           cursor: "pointer",
-          marginRight: 10
+          marginRight: 10,
         }}
       >
         Complete Goal
@@ -123,11 +129,32 @@ export default function App() {
           borderRadius: 20,
           border: "none",
           background: "#ccc",
-          cursor: "pointer"
+          cursor: "pointer",
         }}
       >
         Reset
       </button>
+
+      {/* HISTORY SECTION */}
+      <h2 style={{ marginTop: 30 }}>📅 History</h2>
+
+      {Object.keys(history).length === 0 && <p>No history yet</p>}
+
+      {Object.entries(history).map(([date, data]) => (
+        <div
+          key={date}
+          style={{
+            background: "white",
+            padding: 10,
+            borderRadius: 10,
+            marginBottom: 10,
+          }}
+        >
+          <strong>{date}</strong>
+          <p>Goals: {data.goals}/{MAX_GOALS}</p>
+          <p>Notes: {data.notes || "No notes"}</p>
+        </div>
+      ))}
     </div>
   );
 }
