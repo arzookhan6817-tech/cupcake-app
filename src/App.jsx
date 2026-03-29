@@ -4,11 +4,11 @@ export default function App() {
   const [notes, setNotes] = useState("");
   const [goals, setGoals] = useState(0);
 
-  const today = new Date().toDateString();
-
-  // Load data + reset check
+  // Load + reset (RUN ONLY ONCE)
   useEffect(() => {
     try {
+      const today = new Date().toDateString();
+
       const savedNotes = localStorage.getItem("notes");
       const savedGoals = localStorage.getItem("goals");
       const savedDate = localStorage.getItem("date");
@@ -18,7 +18,6 @@ export default function App() {
       if (savedDate === today) {
         if (savedGoals) setGoals(Number(savedGoals));
       } else {
-        // New day → reset goals ONLY
         localStorage.setItem("date", today);
         localStorage.setItem("goals", "0");
         setGoals(0);
@@ -26,7 +25,7 @@ export default function App() {
     } catch (e) {
       console.log("Storage error", e);
     }
-  }, [today]);
+  }, []); // ⚠️ IMPORTANT: empty array
 
   // Save data
   useEffect(() => {
