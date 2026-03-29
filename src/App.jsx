@@ -2,42 +2,57 @@ import { useState, useEffect } from "react";
 import confetti from "canvas-confetti";
 
 export default function App() {
-  const [notes, setNotes] = useState("");
-  const [goals, setGoals] = useState(0);
+  const todayKey = new Date().toDateString();
 
+  const [dayData, setDayData] = useState({
+    notes: "",
+    goals: 0,
+  });
+
+  // LOAD DATA
   useEffect(() => {
-    const today = new Date().toDateString();
+    try {
+      const saved = localStorage.getItem(todayKey);
 
-    const savedNotes = localStorage.getItem("notes");
-    const savedGoals = localStorage.getItem("goals");
-    const savedDate = localStorage.getItem("date");
-
-    if (savedNotes) setNotes(savedNotes);
-
-    if (savedDate === today) {
-      if (savedGoals) setGoals(Number(savedGoals));
-    } else {
-      localStorage.setItem("date", today);
-      localStorage.setItem("goals", "0");
-      setGoals(0);
+      if (saved) {
+        setDayData(JSON.parse(saved));
+      } else {
+        const freshData = { notes: "", goals: 0 };
+        localStorage.setItem(todayKey, JSON.stringify(freshData));
+        setDayData(freshData);
+      }
+    } catch (e) {
+      console.log("Load error", e);
     }
   }, []);
 
+  // SAVE DATA
   useEffect(() => {
-    localStorage.setItem("notes", notes);
-    localStorage.setItem("goals", goals.toString());
-  }, [notes, goals]);
+    try {
+      localStorage.setItem(todayKey, JSON.stringify(dayData));
+    } catch (e) {
+      console.log("Save error", e);
+    }
+  }, [dayData]);
 
+  // COMPLETE GOAL
   const completeGoal = () => {
-    const newGoals = goals + 1;
-    setGoals(newGoals);
+    const newGoals = dayData.goals + 1;
+
+    const updated = {
+      ...dayData,
+      goals: newGoals,
+    };
+
+    setDayData(updated);
 
     if (newGoals === 5) {
       confetti();
-      alert("🎉 Your partner would be proud of you.");
+      alert("🎉 100% done. Your partner would be impressed.");
     }
   };
 
+  // GREETING
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning ☀️";
@@ -51,7 +66,7 @@ export default function App() {
         padding: 20,
         fontFamily: "sans-serif",
         background: "linear-gradient(135deg, #ffe4ec, #fff0f5)",
-        minHeight: "100vh"
+        minHeight: "100vh",
       }}
     >
       <h1 style={{ color: "#ff4d6d" }}>💖 Cupcake App</h1>
@@ -59,19 +74,21 @@ export default function App() {
 
       <h2>📝 Daily Notes</h2>
       <textarea
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
+        value={dayData.notes}
+        onChange={(e) =>
+          setDayData({ ...dayData, notes: e.target.value })
+        }
         rows={6}
         style={{
           width: "100%",
           borderRadius: 10,
           padding: 10,
-          border: "1px solid #ffb3c1"
+          border: "1px solid #ffb3c1",
         }}
       />
 
       <h2>🎯 Goals</h2>
-      <p>{goals}/5 completed</p>
+      <p>{dayData.goals}/5 completed</p>
 
       <button
         onClick={completeGoal}
@@ -81,7 +98,7 @@ export default function App() {
           border: "none",
           background: "#ff4d6d",
           color: "white",
-          cursor: "pointer"
+          cursor: "pointer",
         }}
       >
         Complete Goal
