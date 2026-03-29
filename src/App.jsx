@@ -3,10 +3,9 @@ import { useState, useEffect } from "react";
 export default function App() {
   const [notes, setNotes] = useState("");
   const [goals, setGoals] = useState(0);
-  const [date, setDate] = useState(new Date().toDateString());
+  const [date] = useState(new Date().toDateString());
   const [quote, setQuote] = useState("");
 
-  // Quotes logic (time-based)
   useEffect(() => {
     const hour = new Date().getHours();
 
@@ -15,7 +14,6 @@ export default function App() {
     else setQuote("🌙 Evening already? Still not done?");
   }, []);
 
-  // Load saved data
   useEffect(() => {
     const savedNotes = localStorage.getItem("notes");
     const savedGoals = localStorage.getItem("goals");
@@ -24,21 +22,18 @@ export default function App() {
     if (savedNotes) setNotes(savedNotes);
     if (savedGoals) setGoals(Number(savedGoals));
 
-    // Reset daily
     if (savedDate !== date) {
       localStorage.setItem("date", date);
       localStorage.setItem("goals", "0");
       setGoals(0);
     }
-  }, []);
+  }, [date]);
 
-  // Save data
   useEffect(() => {
     localStorage.setItem("notes", notes);
     localStorage.setItem("goals", goals.toString());
   }, [notes, goals]);
 
-  // Goal complete
   const completeGoal = () => {
     const newGoals = goals + 1;
     setGoals(newGoals);
