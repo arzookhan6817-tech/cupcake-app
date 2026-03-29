@@ -8,6 +8,8 @@ export default function App() {
     goals: 0,
   });
 
+  const MAX_GOALS = 5;
+
   // LOAD DATA
   useEffect(() => {
     try {
@@ -34,8 +36,13 @@ export default function App() {
     }
   }, [dayData]);
 
-  // COMPLETE GOAL
+  // COMPLETE GOAL (WITH LIMIT)
   const completeGoal = () => {
+    if (dayData.goals >= MAX_GOALS) {
+      alert("You’ve already completed all goals today 😌");
+      return;
+    }
+
     const newGoals = dayData.goals + 1;
 
     setDayData({
@@ -43,9 +50,17 @@ export default function App() {
       goals: newGoals,
     });
 
-    if (newGoals === 5) {
-      alert("🎉 100% done. Your partner would be impressed.");
+    if (newGoals === MAX_GOALS) {
+      alert("🎉 100% done. Your partner would be proud.");
     }
+  };
+
+  // RESET GOALS (optional but powerful)
+  const resetGoals = () => {
+    setDayData({
+      ...dayData,
+      goals: 0,
+    });
   };
 
   // GREETING
@@ -84,7 +99,7 @@ export default function App() {
       />
 
       <h2>🎯 Goals</h2>
-      <p>{dayData.goals}/5 completed</p>
+      <p>{dayData.goals}/{MAX_GOALS} completed</p>
 
       <button
         onClick={completeGoal}
@@ -95,9 +110,23 @@ export default function App() {
           background: "#ff4d6d",
           color: "white",
           cursor: "pointer",
+          marginRight: 10
         }}
       >
         Complete Goal
+      </button>
+
+      <button
+        onClick={resetGoals}
+        style={{
+          padding: "10px 20px",
+          borderRadius: 20,
+          border: "none",
+          background: "#ccc",
+          cursor: "pointer"
+        }}
+      >
+        Reset
       </button>
     </div>
   );
